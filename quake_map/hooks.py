@@ -1,7 +1,7 @@
 app_name = "quake_map"
 app_title = "Quake Map"
-app_publisher = "seemi"
-app_description = "SC Project"
+app_publisher = "Seemab"
+app_description = "Quake Map"
 app_email = "seemabasghar64@gmail.com"
 app_license = "mit"
 

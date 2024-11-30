@@ -1,6 +1,6 @@
 ## Quake Map
 
-SC Project
+Quake Map
 
 #### License
 
