@@ -1,0 +1,42 @@
+{% extends "templates/web.html" %}
+
+{% block content %}
+<div class="container">
+    <h3>Register for Alerts</h3>
+    <form id="alertRegistrationForm">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="region">City or Region:</label>
+            <input type="text" id="region" name="region" required class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("alertRegistrationForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const region = document.getElementById("region").value;
+
+        // Call Frappe backend to save user preferences
+        frappe.call({
+            method: "quake_map.quake_map.doctype.alerts.alerts.register_user",
+            args: { email: email, region: region },
+            callback: function (response) {
+                if (response.message === "success") {
+                    frappe.msgprint("Thank you for registering!");
+                    window.location.href = "/earthquake_dashboard";
+                } else if (response.message === "exists") {
+                    frappe.msgprint("You're already registered!");
+                } else {
+                    frappe.msgprint("Error: Unable to register.");
+                }
+            },
+        });
+    });
+</script>
+{% endblock %}

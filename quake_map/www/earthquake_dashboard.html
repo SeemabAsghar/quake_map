@@ -1,0 +1,197 @@
+{% extends "templates/web.html" %}
+{% block content %}
+
+<nav style="background-color: #333; padding: 20px; position: fixed; width: 100%; top: 0; left: 0; box-sizing: border-box;">
+    <div style="display: flex; justify-content: space-between; align-items: center; max-width: 100%; margin: 0 auto;">
+        <div style="flex-grow: 1; text-align: center; color: white; font-size: 20px; white-space: nowrap;">
+            Want to get Alerts?
+        </div>
+        <div>
+            <a href="#" id="alert_registration_button" style="color: white; text-decoration: none; font-size: 20px; margin-right: 20px;">Register</a>
+        </div>
+    </div>
+</nav>
+
+<h2>Earthquake Dashboard</h2>
+<form method="POST">
+  <label>{{ _("Start Date")}}:</label>
+  <input type="date" id="start_date" name="start_date">
+  <br><br>
+  <label>End Date:</label>
+  <input type="date" id="end_date" name="end_date">
+  <br><br>
+  <label>Minimum Magnitude:</label>
+  <input type="number" id="min_magnitude" name="min_magnitude" step="0.1" min="-3.0" max="7.0" placeholder="-3.0">
+  <br><br>
+  <label>Maximum Magnitude:</label>
+  <input type="number" id="max_magnitude" name="max_magnitude" step="0.1" min="-3.0" max="7.0" placeholder="7.0">
+  <br><br>
+  <label>City:</label>
+  <select id="city_dropdown" name="city">
+  <option value="">Select a City</option>
+  </select>
+  <br><br>
+  <input type="submit" id="fetch_data" value="Fetch Data">
+</form>
+
+
+<h3>Earthquake Data Results</h3>
+<table border="1" id="earthquake_data">
+    <tr>
+        <!-- <th>ID</th>  -->
+        <th>Magnitude</th>
+        <th>Place</th>
+        <th>Time</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+    </tr>
+</table> 
+
+<div id="alert_registration_modal" style="display: none;">
+    <form id="alert_registration_form">
+      <h3>Register for Alerts</h3>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+      <br><br>
+      <label for="region">Region/City:</label>
+      <input type="text" id="region" name="region" required>
+      <br><br>
+      <button type="submit">Register</button>
+      <button type="button" id="close_modal">Cancel</button>
+    </form>
+</div>
+  
+<script>
+	frappe.ready(function() {
+        frappe.call({
+        method: 'quake_map.quake_map.doctype.earthquake_data.earthquake_data.get_cities',
+        callback: function (r) {
+            if (r.message) {
+                let dropdown = document.getElementById("city_dropdown");
+                dropdown.innerHTML = ""; // Clear existing options
+                let defaultOption = document.createElement("option");
+                defaultOption.text = "Select a City";
+                defaultOption.value = "";
+                dropdown.add(defaultOption);
+
+                r.message.forEach(function (city) {
+                    let option = document.createElement("option");
+                    option.text = city;
+                    option.value = city;
+                    dropdown.add(option);
+                });
+            }
+        },
+    });
+    const modal = document.getElementById("alert_registration_modal");
+
+    document.getElementById("alert_registration_button").addEventListener("click", function() {
+    modal.style.display = "block";
+  });
+
+  document.getElementById("close_modal").addEventListener("click", function() {
+    modal.style.display = "none";
+  });
+
+  document.getElementById("alert_registration_form").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const region = document.getElementById("region").value;
+
+    frappe.call({
+      method: "quake_map.quake_map.doctype.alerts.alerts.register_alert",
+      args: {
+        email: email,
+        region: region
+      },
+      callback: function(response) {
+        if (response.message === "success") {
+          frappe.msgprint("Thank you for registering! You will now receive alerts.");
+          modal.style.display = "none";
+        } else {
+          frappe.msgprint("An error occurred. Please try again.");
+        }
+      }
+    });
+    });
+  
+
+    let earthquakeData = []; // Store the fetched data
+		$('#fetch_data').on('click', function(e) {
+            e.preventDefault();
+            let start_date = $('#start_date').val();
+            let end_date = $('#end_date').val();
+            let min_magnitude = $('#min_magnitude').val();
+            let max_magnitude = $('#max_magnitude').val();
+            let city = $('#city_dropdown').val();
+
+            if (start_date === '' || end_date === '') {
+                frappe.msgprint('Please select both start and end dates.');
+                return;
+            }
+            if (earthquakeData.length === 0) {
+                frappe.call({
+                    method: 'quake_map.quake_map.doctype.earthquake_data.earthquake_data.fetch_data',
+                    args: {
+                        start_date: start_date,
+                        end_date: end_date,
+                        min_magnitude: min_magnitude,
+                        max_magnitude: max_magnitude,
+                        city: city
+                    },
+                    callback: function(r) {
+                        if (r.message) {
+                            console.log(r);
+                            console.log(start_date);
+                            console.log(end_date);
+                            console.log(min_magnitude);
+                            console.log(max_magnitude);
+                            console.log(city);
+                            earthquakeData = r.message;
+                            displayData(earthquakeData);
+                        }
+                    }
+                });
+            }
+            else {
+                let filteredData = earthquakeData;
+                if (min_magnitude) {
+                filteredData = filteredData.filter(d => d.magnitude >= parseFloat(min_magnitude));
+                }
+
+                if (max_magnitude) {
+                    filteredData = filteredData.filter(d => d.magnitude <= parseFloat(max_magnitude));
+                }
+            
+                if (city) {
+                    filteredData = filteredData.filter(d => d.place.includes(city));
+                }
+            
+                displayData(filteredData); 
+    }
+});
+function displayData(data) {
+    let table = document.getElementById("earthquake_data");
+
+    let rowCount = table.rows.length;
+    while (rowCount > 1) {
+        table.deleteRow(1);
+        rowCount--;
+    }
+    data.forEach((item, index) => {
+        let row = table.insertRow();
+        row.insertCell(0).innerHTML = item.magnitude;
+        row.insertCell(1).innerHTML = item.place;
+        row.insertCell(2).innerHTML = item.time;
+        row.insertCell(3).innerHTML = item.latitude;
+        row.insertCell(4).innerHTML = item.longitude;
+        });
+    }
+});
+
+
+    </script>
+
+
+{% endblock %}

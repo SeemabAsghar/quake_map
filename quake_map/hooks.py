@@ -5,6 +5,15 @@ app_description = "Quake Map"
 app_email = "seemabasghar64@gmail.com"
 app_license = "mit"
 
+
+scheduler_events = {
+    "cron": {
+        "*/10 * * * *": [ 
+            "quake_map.quake_map.api.fetch_and_store_earthquake_data" 
+        ]
+    }
+}
+
 # Apps
 # ------------------
 
@@ -25,8 +34,10 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/quake_map/css/quake_map.css"
-# app_include_js = "/assets/quake_map/js/quake_map.js"
+# app_include_css = "/assets/quake_map/css/style.css"
+# app_include_js = "/assets/quake_map/js/script.js"
+# app_include_js = "/assets/quake_map/js/quake_filter.js"
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/quake_map/css/quake_map.css"
@@ -148,6 +159,7 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
+
 # scheduler_events = {
 # 	"all": [
 # 		"quake_map.tasks.all"
@@ -241,4 +253,5 @@ app_license = "mit"
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-
+#Whitelisted 
+# ----------------------
