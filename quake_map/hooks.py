@@ -4,6 +4,7 @@ app_publisher = "Seemab"
 app_description = "Quake Map"
 app_email = "seemabasghar64@gmail.com"
 app_license = "mit"
+app_logo_url = "/assets/quake_map/img/cover-1.png"
 
 
 scheduler_events = {

@@ -8,14 +8,14 @@ from frappe.model.document import Document
 
 
 class EarthquakeData(Document):
-	def after_insert(self):
+    def after_insert(self):
         self.send_alerts()
 
     def send_alerts(self):
         if self.magnitude < 3.0:
             return  
 
-        alert_level = self.classify_earthquake(self)
+        self.alert_level = self.classify_earthquake()
         affected_users = frappe.db.sql(
         """
             SELECT email FROM `tabAlerts`
@@ -24,18 +24,36 @@ class EarthquakeData(Document):
         (f"%{self.place.split(',')[-1].strip()}%",), as_dict=True)
 
         for user in affected_users:
-            frappe.sendmail(
-                recipients=user.email,
-                subject= _("Earthquake Alert: {0} Earthquake Detected").format(alert_level),
-                message=f"""
-                A {alert_level} earthquake of magnitude {self.magnitude} was detected at {self.place}.
-                Time: {self.time}
-                Latitude: {self.latitude}, Longitude: {self.longitude}.
-                Stay safe and take necessary precautions.
-                """
+           frappe.sendmail(
+            recipients=user.email,
+            subject=_("🌍 Earthquake Alert: {0} Earthquake Detected").format(self.alert_level),
+            message=_(""" 
+            <div style="font-family: 'Georgia', sans-serif; color: #333; line-height: 1.8; padding: 20px; border: 1px solid #ddd; border-radius: 8px; max-width: 600px; margin: 20px auto; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+                <h2 style="color: #D9534F; text-align: center;">⚠️ {0} Earthquake Alert</h2>
+                <div style="margin: 20px 0;">
+                    <p><strong>🌡 Magnitude:</strong> <span style="color: #D9534F;">{1}</span></p>
+                    <p><strong>📍 Location:</strong> {2}</p>
+                    <p><strong>🕒 Time:</strong> {3}</p>
+                    <p><strong>🌐 Coordinates:</strong> {4}, {5}</p>
+                </div>
+                <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                <div style="background-color: #fef3c7; padding: 15px; border-radius: 5px;">
+                    <h3 style="color: #D97706;">🔹 What You Should Know</h3>
+                    <p>Earthquakes can cause damage to buildings and infrastructure. Aftershocks may follow the initial quake. Stay alert and prepared.</p>
+                    <p><strong>Precautionary Measures:</strong></p>
+                    <ul style="padding-left: 20px;">
+                        <li>🏠 Move to an open area away from buildings and power lines if possible.</li>
+                        <li>🛡️ Drop, cover, and hold on if indoors. Protect your head and neck.</li>
+                        <li>🚪 Stand in a doorway or take shelter under sturdy furniture.</li>
+                        <li>📱 Stay informed through local authorities and alerts.</li>
+                    </ul>
+                </div>
+                <p style="margin-top: 30px; text-align: center; color: #888;">Your safety is our top priority. Please take care and remain vigilant.</p>
+            </div>
+            """).format(self.alert_level, self.magnitude, self.place, self.time, self.latitude, self.longitude)
             )
-        
-        frappe.msgprint(f"Alert sent for earthquake at {self.place}")
+
+        frappe.msgprint("Alert sent for earthquake at {0}".format(self.place))
 
 
     def classify_earthquake(self):
@@ -77,13 +95,14 @@ def fetch_data(start_date, end_date, min_magnitude=None, max_magnitude=None, cit
     
     if city:
         conditions += " AND place LIKE %s"
-        filters.append(f"%, {city}")
+        filters.append=_("%, {0},%").format(city)
     
     query_response = frappe.db.sql(
-        f"""
+        _("""
         SELECT * FROM `tabEarthquake Data`
-        {conditions}
-        """,
+        {0}
+        """).
+        format(conditions),
         tuple(filters),
         as_dict=True,
     )

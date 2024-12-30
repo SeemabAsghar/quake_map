@@ -1,97 +1,420 @@
 {% extends "templates/web.html" %}
 {% block content %}
 
-<nav style="background-color: #333; padding: 20px; position: fixed; width: 100%; top: 0; left: 0; box-sizing: border-box;">
-    <div style="display: flex; justify-content: space-between; align-items: center; max-width: 100%; margin: 0 auto;">
-        <div style="flex-grow: 1; text-align: center; color: white; font-size: 20px; white-space: nowrap;">
-            Want to get Alerts?
-        </div>
-        <div>
-            <a href="#" id="alert_registration_button" style="color: white; text-decoration: none; font-size: 20px; margin-right: 20px;">Register</a>
-        </div>
+<style>
+  .wave-container {
+    position: absolute;
+    width: calc(100% - 135px); 
+    height: 60px;
+    top: 0;
+    left: 135px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .wave {
+    position: absolute;
+    top: 23px;
+    width: 200%;
+    height: 100px;
+    background: none;
+    opacity: 0.8;
+  }
+  .wave.top-wave {
+      top: -20px; 
+    }
+  
+    /* Wave 2 (bottom wave) */
+    .wave.bottom-wave {
+        bottom: -60px; /* Position slightly below the navbar */
+        top: auto;    
+    }
+
+  .wave svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .wave path {
+    stroke: gray;
+    stroke-width: 4;
+    fill: none;
+    animation: path-wave 15s infinite linear;
+  }
+
+  .wave:nth-child(2) path {
+    animation-duration: 18s; /* Different speed for second wave */
+    animation-delay: -5s; /* Offset the second wave */
+  }
+
+  @keyframes path-wave {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+</style>
+
+<nav style="background-color:#a3caea; padding: 50px 20px; position: fixed; width: 100%; top: 0; left: 0; box-sizing: border-box; height: 60px; z-index: 10;">
+  <div style="display: flex; justify-content: space-between; align-items: center; max-width: 100%; margin: 0 auto; height: 100%;">
+    
+    <div style="flex-shrink: 0; margin-left: -20px ; padding: -200px;">
+      <img src="/assets/quake_map/img/cover-1.png" alt="Logo" style="height: 100px; width: 135px;">
     </div>
+    <div style="flex-grow: 1; text-align: center; color: rgb(40, 39, 62); font-size: 20px;font-weight: bold;white-space: nowrap;">
+      Want to get Alerts?
+    </div>
+    <div>
+      <a href="#" id="alert_registration_button" style="color: rgb(40, 39, 62); text-decoration: none; font-size: 20px; margin-right: 20px; font-weight: bold;">Register</a>
+    </div>        
+  </div>
+
+  <div class="wave-container">
+    <div class="wave top-wave">
+      <svg viewBox="0 0 1200 100" preserveAspectRatio="none">
+        <path d="M0 50 L 20 35 L 40 45 L 60 40 L 80 55 L 100 30 L 120 50 L 140 40 L 160 55 L 180 30 L 200 50 L 220 35 L 240 55 L 260 30 L 280 50 L 300 40 L 320 60 L 340 30 L 360 50 L 380 25 L 400 60 L 420 30 L 440 50 L 460 30 L 480 55 L 500 40 L 520 60 L 540 35 L 560 50 L 580 25 L 600 55 L 620 40 L 640 60 L 660 25 L 680 50 L 700 30 L 720 55 L 740 40 L 760 50 L 780 30 L 800 50 L 820 25 L 840 55 L 860 40 L 880 60 L 900 25 L 920 50 L 940 30 L 960 55 L 980 40 L 1000 50 L 1020 30 L 1040 55 L 1060 40 L 1080 50 L 1100 30 L 1120 50 L 1140 25 L 1160 55 L 1180 40 L 1200 50" />
+      </svg>
+    </div>
+    <div class="wave bottom-wave">
+      <svg viewBox="0 0 1200 100" preserveAspectRatio="none">
+        <path d="M0 50 L 20 35 L 40 45 L 60 40 L 80 55 L 100 30 L 120 50 L 140 40 L 160 55 L 180 30 L 200 50 L 220 35 L 240 55 L 260 30 L 280 50 L 300 40 L 320 60 L 340 30 L 360 50 L 380 25 L 400 60 L 420 30 L 440 50 L 460 30 L 480 55 L 500 40 L 520 60 L 540 35 L 560 50 L 580 25 L 600 55 L 620 40 L 640 60 L 660 25 L 680 50 L 700 30 L 720 55 L 740 40 L 760 50 L 780 30 L 800 50 L 820 25 L 840 55 L 860 40 L 880 60 L 900 25 L 920 50 L 940 30 L 960 55 L 980 40 L 1000 50 L 1020 30 L 1040 55 L 1060 40 L 1080 50 L 1100 30 L 1120 50 L 1140 25 L 1160 55 L 1180 40 L 1200 50" />
+      </svg>
+    </div>
+  </div>
 </nav>
 
-<h2>Earthquake Dashboard</h2>
-<form method="POST">
-  <label>{{ _("Start Date")}}:</label>
-  <input type="date" id="start_date" name="start_date">
-  <br><br>
-  <label>End Date:</label>
-  <input type="date" id="end_date" name="end_date">
-  <br><br>
-  <label>Minimum Magnitude:</label>
-  <input type="number" id="min_magnitude" name="min_magnitude" step="0.1" min="-3.0" max="7.0" placeholder="-3.0">
-  <br><br>
-  <label>Maximum Magnitude:</label>
-  <input type="number" id="max_magnitude" name="max_magnitude" step="0.1" min="-3.0" max="7.0" placeholder="7.0">
-  <br><br>
-  <label>City:</label>
-  <select id="city_dropdown" name="city">
-  <option value="">Select a City</option>
-  </select>
-  <br><br>
-  <input type="submit" id="fetch_data" value="Fetch Data">
-</form>
+<style>
+    footer {
+    display: none !important;
+}
+</style>    
+<div class="flex-container">
+    <div class="form-container">
+        <h2>Earthquake Dashboard</h2>
+        <form method="POST">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date">
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date">
+            <label for="magnitude_range">Magnitude Range:</label>
+            <div style="display: flex; gap: 6px;">
+                <input type="number" id="min_magnitude" name="min_magnitude" step="0.1" min="-3.0" max="7.0" placeholder="-3.0">
+                <span>to</span>
+                <input type="number" id="max_magnitude" name="max_magnitude" step="0.1" min="-3.0" max="7.0" placeholder="7.0">
+            </div>
+            <label for="city_dropdown">City:</label>
+            <select id="city_dropdown" name="city">
+                <option value="">Select a City</option>
+            </select>
+            <input type="submit" id="fetch_data" value="Fetch Data">
+        </form>
+    </div>
 
+    <div class="result-container">
+        <h3>Earthquake Data Results</h3>
 
-<h3>Earthquake Data Results</h3>
-<table border="1" id="earthquake_data">
-    <tr>
-        <!-- <th>ID</th>  -->
-        <th>Magnitude</th>
-        <th>Place</th>
-        <th>Time</th>
-        <th>Latitude</th>
-        <th>Longitude</th>
-    </tr>
-</table> 
-
-<div id="alert_registration_modal" style="display: none;">
-    <form id="alert_registration_form">
-      <h3>Register for Alerts</h3>
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required>
-      <br><br>
-      <label for="region">Region/City:</label>
-      <input type="text" id="region" name="region" required>
-      <br><br>
-      <button type="submit">Register</button>
-      <button type="button" id="close_modal">Cancel</button>
-    </form>
+        <div style="overflow-y: auto; max-height: calc(100vh - 100px);">
+            <table border="1" id="earthquake_data">
+                <tr>
+                    <th>Magnitude</th>
+                    <th>Place</th>
+                    <th>Time</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* Styling for all headings (h2, h3) */
+    h2 {
+        margin-top: 20px;
+        color: #a3caea;
+        font-family: 'Georgia', serif;
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    h3 {
+        margin-top: 20px;
+        color: #a3caea;
+        font-family: 'Georgia', serif;
+        text-align: center;
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    /* Styling for buttons */
+    input[type="submit"] {
+        background-color: #a3caea; /* Green background */
+        color: #1c1e20;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        width: 100px;
+        cursor: pointer;
+        display: block; 
+    }
+    /* Change button color on hover */
+    input[type="submit"]:hover {
+        background-color: #488db8;
+
+    }
+
+    /* Styling for labels */
+    label {
+        font-size: 14px;
+        color: #dae9f1;
+        font-weight: normal;
+        margin-bottom: 5px;
+    }
+
+    /* Styling for input fields */
+    input[type="date"], select {
+        padding: 8px;
+        font-size: 14px;
+        width: 60%;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        border: 1px solid #dae9f1;
+        box-sizing: border-box;
+    }
+
+    input[type="number"] {
+        width: 60px;
+        margin-bottom: 10px;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #dae9f1;
+        border-radius: 4px;
+        box-sizing: border-box
+    }
+
+    /* Add a little spacing between form elements */
+    form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: Georgia, serif;
+    }
+
+    /* Styling for the table */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table th, table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #f2f2f2;
+    }
+
+    table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Add spacing for the overall layout */
+    .flex-container {
+        display: flex;
+        margin-top: 10px;
+    }
+
+    .form-container {
+        position: fixed;   
+        top: 100px;         
+        left: 0px;        
+        width: 250px;      
+        padding: 10px;
+        background-color: rgb(38, 48, 85);
+        border: 2px solid #ccc; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1000; 
+        bottom:0% ;
+    }
+
+    .result-container {
+        flex: 2;
+        padding: 20px;
+        margin-left: 300px;
+        margin-top: 50px;
+        background-color: rgb(38, 48, 85);
+    }
+    body{
+        background-color: rgb(38, 48, 85);
+        font-family: Georgia, serif;
+    }
+    .flex-container {
+        display: flex;
+        margin-top: 10px;
+    }
+</style>
+
+
+<div id="alert_registration_modal" style="
+    display: none; 
+    position: fixed; 
+    z-index: 1050;
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.5); 
+    justify-content: center; 
+    align-items: center;">
+    
+    <div style="background-color: white; color:rgb(38, 48, 85);padding: 20px; border-radius: 8px;">
+        <h3 style="color: rgb(38, 48, 85);">Register for Alerts</h3>
+        <form id="alert_registration_form">
+            <label style="color: rgb(38, 48, 85);">Email:</label>
+            <input type="email" id="email" required>
+            <label style="color: rgb(38, 48, 85);">Region:</label>
+            <input type="text" id="region" required>
+            <br>
+            <div style="display: flex; justify-content: center; gap: 15px;">
+                <button type="submit">Register</button>
+                <button type="button" id="close_modal">Cancel</button>
+            </div>
+            
+        </form>
+    </div>
+</div>
+<style>
+    /* Global styling for modal background */
+#alert_registration_modal {
+  display: none; /* Hidden initially */
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  opacity: 0; /* Start hidden */
+  pointer-events: none; /* Prevent interaction when hidden */
+  animation: fadeInBackground 0.4s ease-out forwards;
+}
+
+/* Background fade-in animation */
+@keyframes fadeInBackground {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Modal box animation */
+#alert_registration_modal > div {
+  background-color: white;
+  color: rgb(38, 48, 85);
+  padding: 20px;
+  border-radius: 10px;
+  transform: translateY(50px);
+  opacity: 0;
+  animation: slideUpIn 0.5s ease-out forwards, scaleIn 0.5s ease-out forwards;
+}
+
+/* Modal "slide up" animation */
+@keyframes slideUpIn {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Modal "scale up" animation */
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Add subtle hover effect on modal content */
+#alert_registration_modal > div:hover {
+  transform: scale(1.05); /* Slightly scale up */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Add subtle shadow on hover */
+}
+
+/* Button styles */
+button {
+  padding: 8px 15px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: rgb(38, 48, 85);
+  color: white;
+  transform: translateY(-2px); /* Subtle lift effect */
+}
+
+/* "Cancel" button (with more focus for canceling) */
+#close_modal {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+}
+
+#close_modal:hover {
+  background-color: rgb(220, 220, 220);
+  transform: translateY(-2px);
+}
+</style>
   
 <script>
-	frappe.ready(function() {
+    frappe.ready(function() {
         frappe.call({
-        method: 'quake_map.quake_map.doctype.earthquake_data.earthquake_data.get_cities',
-        callback: function (r) {
-            if (r.message) {
-                let dropdown = document.getElementById("city_dropdown");
-                dropdown.innerHTML = ""; // Clear existing options
-                let defaultOption = document.createElement("option");
-                defaultOption.text = "Select a City";
-                defaultOption.value = "";
-                dropdown.add(defaultOption);
-
-                r.message.forEach(function (city) {
-                    let option = document.createElement("option");
-                    option.text = city;
-                    option.value = city;
-                    dropdown.add(option);
-                });
-            }
-        },
-    });
+            method: 'quake_map.quake_map.doctype.earthquake_data.earthquake_data.get_cities',
+            callback: function (r) {
+                if (r.message) {
+                    let dropdown = document.getElementById("city_dropdown");
+                    dropdown.innerHTML = ""; 
+                    let defaultOption = document.createElement("option");
+                    defaultOption.text = "Select a City";
+                    defaultOption.value = "";
+                    dropdown.add(defaultOption);
+    
+                    r.message.forEach(function (city) {
+                        let option = document.createElement("option");
+                        option.text = city;
+                        option.value = city;
+                        dropdown.add(option);
+                    });
+                }
+            },
+        });
+    
     const modal = document.getElementById("alert_registration_modal");
+    const openBtn = document.getElementById("alert_registration_button");
+    const closeBtn = document.getElementById("close_modal");
 
-    document.getElementById("alert_registration_button").addEventListener("click", function() {
-    modal.style.display = "block";
-  });
+    openBtn.onclick = () => modal.style.display = "flex";
+    closeBtn.onclick = () => modal.style.display = "none";
 
-  document.getElementById("close_modal").addEventListener("click", function() {
-    modal.style.display = "none";
-  });
+
 
   document.getElementById("alert_registration_form").addEventListener("submit", function(e) {
     e.preventDefault();
@@ -99,22 +422,30 @@
     const email = document.getElementById("email").value;
     const region = document.getElementById("region").value;
 
-    frappe.call({
-      method: "quake_map.quake_map.doctype.alerts.alerts.register_alert",
-      args: {
-        email: email,
-        region: region
-      },
-      callback: function(response) {
-        if (response.message === "success") {
-          frappe.msgprint("Thank you for registering! You will now receive alerts.");
-          modal.style.display = "none";
-        } else {
-          frappe.msgprint("An error occurred. Please try again.");
-        }
-      }
+    document.getElementById("alert_registration_form").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const region = document.getElementById("region").value;
+
+        frappe.call({
+            method: "quake_map.quake_map.doctype.alerts.alerts.register_alert",
+            args: {
+                email: email,
+                region: region
+            },
+            callback: function(response) {
+                if (response.message === "success") {
+                    frappe.msgprint("Thank you for registering! You will now receive alerts.");
+                    modal.style.display = "none";
+                } else {
+                    frappe.msgprint("Already Registered!");
+                }
+            }
+        });
     });
-    });
+});
+
   
 
     let earthquakeData = []; // Store the fetched data

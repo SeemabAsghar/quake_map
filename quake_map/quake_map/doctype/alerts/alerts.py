@@ -1,6 +1,5 @@
 import frappe
 from frappe.model.document import Document
-from frappe.utils.background_jobs import enqueue
 
 
 class Alerts(Document):
@@ -17,3 +16,4 @@ def register_alert(email, region):
         return "success"
     else:
         return "already_registered"
+
