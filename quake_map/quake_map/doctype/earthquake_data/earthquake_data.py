@@ -8,6 +8,12 @@ from frappe.model.document import Document
 
 
 class EarthquakeData(Document):
+    def validate(self):
+        if not self.magnitude:  # Check if magnitude is None or 0
+            frappe.throw("Magnitude is required", frappe.ValidationError)
+        elif self.magnitude <= 0:
+            frappe.throw("Magnitude must be a positive value", frappe.ValidationError)
+
     def after_insert(self):
         self.send_alerts()
 
@@ -74,6 +80,17 @@ class EarthquakeData(Document):
             return "Mega-Earthquake."
         else:
             return "Unknown Earthquake."
+        
+@frappe.whitelist()
+def fetch_initial_data():
+    data = frappe.get_all(
+        "Earthquake Data",
+        fields=["magnitude", "place", "time", "latitude", "longitude"],
+        order_by="time desc",
+        limit_page_length=50
+    )
+    return data
+
 
 
 @frappe.whitelist()
@@ -95,7 +112,7 @@ def fetch_data(start_date, end_date, min_magnitude=None, max_magnitude=None, cit
     
     if city:
         conditions += " AND place LIKE %s"
-        filters.append=_("%, {0},%").format(city)
+        filters.append("%{0}".format(city))
     
     query_response = frappe.db.sql(
         _("""
@@ -104,7 +121,7 @@ def fetch_data(start_date, end_date, min_magnitude=None, max_magnitude=None, cit
         """).
         format(conditions),
         tuple(filters),
-        as_dict=True,
+        as_dict=True, debug=True
     )
     return query_response
 

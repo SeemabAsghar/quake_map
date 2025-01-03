@@ -9,7 +9,7 @@ def fetch_earthquake_data():
     now = datetime.now()
     params = {
         "format": "geojson",
-        "starttime": (now - timedelta(days=15)).isoformat(),
+        "starttime": (now - timedelta(days=10)).isoformat(),
         "endtime": now.isoformat(),
     }
     response = requests.get(USGS_API_URL, params=params)
@@ -33,7 +33,6 @@ def save_to_frappe(event):
             "place": properties.get("place"),
             "latitude": geometry[1],
             "longitude": geometry[0],
-            "depth": geometry[2],
             "significance": properties.get("sig"),
             "time": datetime.fromtimestamp(properties.get("time") / 1000),
             "coordinates": coordinates
